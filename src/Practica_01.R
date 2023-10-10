@@ -44,7 +44,8 @@ tabla_general[2,3]
 print("Agrega fila con rbind")
 incremento = c(2,4,6)
 tabla_general = rbind(tabla_general, incremento)
-print("Ignora 1st row")
+
+print("Ignora 1st row - Borra el nombre de la columna de productos")
 tabla_general = tabla_general[-1]
 tabla_general
 
@@ -52,3 +53,28 @@ print("Agrega columna con cbind")
 abril = c(21,22,23,24)
 tabla_general = cbind(tabla_general, abril)
 tabla_general
+
+class(tabla_general)
+class(productos)
+class(ene_18)
+
+#########################################
+# Ciclos                                #
+#########################################
+
+precios_ene18 = tabla_general$ene_18
+for (precio in precios_ene18)(
+  print(paste("el precio es: ", precio))
+)
+
+#########################################
+#     Función para calcular el IVA      #
+#########################################
+
+get_iva = function(valor){
+  precio * 0.16
+}
+
+for (precio in precios_ene18)(
+  get_iva(precio)
+)
