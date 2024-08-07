@@ -1,0 +1,142 @@
+---
+title: "Intermediate R. Cheatsheet elaborated from datacamp course."
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+# Lest's loop!
+
+### Build a while loop from scratch
+
+
+```{r}
+# Initialize i as 1 
+i <- 1
+
+# Code the while loop
+while (i <= 10) {
+  print(3 * i)
+  if (3*i %% 8 == 0) {
+    break
+  }
+  i <- i + 1
+}
+```
+### Loop over a vector
+
+```{r}
+linkedin <- c(16, 9, 13, 5, 2, 17, 14)
+
+# Loop version 1
+
+for (element in linkedin) {
+    print(element)
+}
+
+# Loop version 2
+for (i in 1:length(linkedin)) {
+    cat(linkedin[i], "\n")
+}
+```
+### Loop over a list
+
+You need double square brackets - [[ ]] - to select the list elements in loop version 2.
+
+```{r}
+# The nyc list is already specified
+nyc <- list(pop = 8405837, 
+            boroughs = c("Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"), 
+            capital = FALSE)
+
+# Loop version 1
+for (element in nyc) {
+    print(element)
+}
+
+# Loop version 2
+for (i in 1:length(nyc)) {
+    print(nyc[[i]])
+}
+```
+### Loop over a matrix
+
+```{r}
+tic_tac_toe <- matrix(c("X", "O", "X",
+                        "O", "X", "O",
+                        "X", "O", "X"), 
+                      nrow = 3, ncol = 3, byrow = TRUE)
+
+# define the double for loop
+for (i in 1:nrow(tic_tac_toe)) {
+  for (j in 1:ncol(tic_tac_toe)) {
+    print(paste("On row ", i, "and column ", j , "the board contains ", tic_tac_toe[[i,j]]))
+  }
+}
+```
+### Mix it up with control flow
+
+```{r}
+linkedin <- c(16, 9, 13, 5, 2, 17, 14)
+
+# Code the for loop with conditionals
+for (li in linkedin) {
+  if ( li > 10 ) {
+    print("You're popular!")
+  } else {
+    print("Be more visible!")
+  }
+  print(li)
+}
+```
+### Next, you break it
+
+```{r}
+linkedin <- c(16, 9, 13, 5, 2, 17, 14)
+
+# Adapt/extend the for loop
+for (li in linkedin) {
+  if (li > 10) {
+    print("You're popular!")
+  } else {
+    print("Be more visible!")
+  }
+  # Add if statement with break
+  if (li > 16) {
+    print("This is ridiculous, I'm outta here!")
+    break
+  } else if (li < 5) {
+    print("This is too embarrassing!")
+  }
+  print(li)
+}
+```
+### Can you write code that counts the number of r's that come before the first u in rquote?
+
+- Initialize the variable rcount, as 0.
+- Finish the for loop:
+    - if char equals "r", increase the value of rcount by 1.
+    - if char equals "u", leave the for loop entirely with a break.
+- Finally, print out the variable rcount to the console to see if your code is correct.
+
+```{r}
+# Pre-defined variables
+rquote <- "r's internals are irrefutably intriguing"
+chars <- strsplit(rquote, split = "")[[1]]
+
+# Initialize rcount
+rcount <- 0
+
+# Finish the for loop
+for (char in chars) {
+  if (char == "r") {
+      rcount = rcount + 1
+  } else if (char == "u") {
+      break
+  }
+}
+
+# Print out rcount
+print(rcount)
+```
+
