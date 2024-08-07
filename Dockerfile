@@ -5,6 +5,11 @@ RUN apt-get update && apt-get install -y \
     libgdal-dev \
     libgeos-dev \
     libproj-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libgit2-dev \
+    libxml2-dev \
+    build-essential \
     gdal-bin
 
 COPY packages.txt /tmp/packages.txt

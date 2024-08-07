@@ -1,3 +1,4 @@
+'cachem'
 'devtools'
 'dismo'
 'dplyr'
@@ -8,6 +9,7 @@
 'maptools'
 'popbio'
 'purrr'
+'remotes'
 'raster'
 'rasterVis'
 'rgbif'
