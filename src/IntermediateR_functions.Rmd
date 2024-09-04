@@ -132,7 +132,7 @@ qplot(mtcars$wt, mtcars$hp)
 ```
 The `library()` and `require()` functions are not very picky when it comes down to argument types: both `library(rjson)` and `library("rjson")` work perfectly fine for loading a package.
 
-### `lapply` function
+## `lapply` function
 
 Before you go about solving the exercises below, have a look at the documentation of the `lapply()` function. The Usage section shows the following expression:
 
@@ -153,7 +153,338 @@ split_low <- lapply(split_math, tolower)
 # Take a look at the structure of split_low
 str(split_low)
 ```
+### `lapply` and anonymous functions
+Writing your own functions and then using them inside `lapply()` is quite an accomplishment! But defining functions to use them only once is kind of overkill, isn't it? That's why you can use so-called anonymous functions in R.
+
+Previously, you learned that functions in R are objects in their own right. This means that they aren't automatically bound to a name. When you create a function, you can use the assignment operator to give the function a name. It's perfectly possible, however, to not give the function a name. This is called an anonymous function:
+
+```
+# Named function
+triple <- function(x) { 3 * x }
+
+# Anonymous function with same implementation
+function(x) { 3 * x }
+
+# Use anonymous function inside lapply()
+lapply(list(1,2,3), function(x) { 3 * x })
+```
+### Use `lapply` with additional arguments
+
+`lapply()` provides a way to handle functions that require more than one argument, such as the `multiply()` function:
+
+```
+multiply <- function(x, factor) {
+  x * factor
+}
+```
+
+`lapply(list(1,2,3), multiply, factor = 3)`
+
+### Apply functions that return NULL
+
+`lapply` always returns a list, no matter the input.
+
+```
+lapply(split_low, function(x) {
+  if (nchar(x[1]) > 5) {
+    return(NULL)
+  } else {
+    return(x[2])
+  }
+})
+```
+## `sapply` function
+
+`sapply` is the short for _simplify apply_. It manages to convert the result to a one dimensional array, which is a vector.
+
+```{r}
+cities <- c("New York", "Paris", "London", "Tokio", "Rio de Janeiro", "Cape Town")
+unlist(lapply(cities, nchar))
+```
+```{r}
+sapply(cities, nchar)
+```
+`sapply` even found a sensible way of naming this vector. But we can choose not to name the output of `sapply`, by setting its `USE.NAMES = FALSE`.
+```{r}
+sapply(cities, nchar, USE.NAMES = FALSE)
+```
+What would happen if the function you want to apply over the input, each time returns a vector containing two values instead of one?
+```{r}
+first_and_last <- function(name) {
+  name <- gsub(" ", "", name)
+  letters <- strsplit(name, split = "")[[1]]
+  c(first = min(letters), last = max(letters))
+}
+
+first_and_last("New York")
+```
+If we use `sapply` over every city name in cities we obtain a matrix, instead of a vector, with 2 rows and 6 columns.
+```{r}
+sapply(cities, first_and_last)
+```
+```{r}
+# Create a function that returns min and max of a vector: extremes
+temp <- list(
+  c(3, 7, 9, 6, -1),
+  c(6, 9, 12, 13, 5),
+  c(4, 8, 3, -1, -3),
+  c(1, 4, 7, 2, -2),
+  c(5, 7, 9, 4, 2),
+  c(-3, 5, 8, 9, 4),
+  c(3, 6, 9, 4, 1)
+)
+
+extremes <- function(x) {
+  c(min = min(x), max = max(x))
+}
+
+# Apply extremes() over temp with sapply()
+sapply(temp, extremes)
+
+# Apply extremes() over temp with lapply()
+lapply(temp, extremes)
+```
+### `sapply` with functions that return `NULL`
+`sapply()` does not simplify the list of `NULL`'s. That's because the 'vector-version' of a list of `NULL`'s would simply be a `NULL`, which is no longer a vector with the same length as the input.
+
+```{r}
+# Definition of print_info()
+print_info <- function(x) {
+  cat("The average temperature is", mean(x), "\n")
+}
+
+# Apply print_info() over temp using sapply()
+sapply(temp, print_info)
+
+# Apply print_info() over temp using lapply()
+lapply(temp, print_info)
+```
+## `vapply` function
+
+ he function `vapply()` has the following syntax:
+
+`vapply(X, FUN, FUN.VALUE, ..., USE.NAMES = TRUE)`
+
+Over the elements inside `X`, the function `FUN` is applied. The `FUN.VALUE` argument expects a template for the return argument of this function `FUN`. `USE.NAMES` is `TRUE` by default; in this case `vapply()` tries to generate a named array, if possible.
+
+- explicitly specify output format.
+
+```{r}
+sapply(cities, nchar)
+```
+In our example, we want to apply the `nchar` function over cities. `nchar` is a function that returns a single number, which is a numeric vector of length 1. We can template this output using the `numeric()` function, by setting `FUN.VALUE` to `numeric(1)`, which tells the `vapply` function that `nchar()` should return a single numerical value. The result is exactly the same as the `sapply` function from before. However, this 'pre-specification' of `FUN`'s return value makes `vapply` a safer alternative to `sapply`.
+
+```{r}
+vapply(cities, nchar, FUN.VALUE = numeric(1))
+```
+The following is an example that throws an error and then we fix it not to throw it again.
+```{r}
+basics <- function(x) {
+  c(min = min(x), mean = mean(x), median = median(x), max = max(x))
+}
+
+# Fix the error:
+vapply(temp, basics, numeric(3))
+```
+```{r}
+# Fix the error:
+vapply(temp, basics, numeric(4))
+```
+---
+## Useful functions
+
+`seq` generates a sequence of numbers. The fisrt two arguments tell R the limits of the sequence. That is, where to str and end the sequence respectively.
+
+```{r}
+seq1 <- seq(8, -2, by = -2)
+seq1
+```
+The `rep` function has the ability to replicate its input, which tipically is a vector or a list. Using the `times` argument, we can specify how the replication should happen.
+```{r}
+rep_seq <- rep(seq1, times = 2)
+rep_seq
+```
+We can also use the each argument inside rep
+```{r}
+rep_each2 <- rep(seq1, each = 2)
+rep_each2
+```
+Then we can `sort` the vector...
+```{r}
+sort(rep_each2, decreasing = FALSE)
+```
+The `str()` function inspect the structure of a list.
+```{r}
+str(seq1)
+str(seq)
+```
+Other useful functions...
+```{r}
+is.list(seq1)
+is.vector(seq1)
+```
+```{r}
+list_seq1 <- as.list(seq1)
+is.list(list_seq1)
+```
+And then we can convert it again to a vector...
+```{r}
+vec_seq1 <- unlist(list_seq1)
+vec_seq1
+is.vector(vec_seq1)
+```
+The `append` function allows you to add elements to a vector or a list in a very readable way.
+```{r}
+vec_seq1 <- append(vec_seq1, 88)
+vec_seq1
+```
+The `rev` function reverses elements in a data structure.
+```{r}
+rev_vec_seq1 <- rev(vec_seq1)
+rev_vec_seq1
+```
+### Regular Expresions and other functions
+
+With the `grepl` functions we can determine, which word, for example, has an _a_ in their name.
+```{r}
+animals <- c("cat", "moose", "impala", "ant", "kiwi")
+grepl(pattern = "a", x = animals)
+```
+For strings that start with an _a_...
+```{r}
+grepl(pattern = "^a", x = animals)
+```
+... and at the end fo the word... 
+```{r}
+grepl(pattern = "a$", x = animals)
+```
+`grep` function returns a vector of indices of the elements of `x` that yield a match.
+```{r}
+grep(pattern = "a", x = animals)
+```
+Now, to replace these matches with other strings we can use `sub`.
+```{r}
+repla1 <- sub(pattern = "a", replacement = "o", x = animals)
+repla1
+```
+The `sub` function only looks for the first match in the string, and if it finds it, replaces it with the replacement argument and immediately stops looking. If we want to replace every single match of a pattern in a string with the replacement argument, you should try the `gsub` function instead. Now, _impala_ gets converted to _impolo_, so the two "a"'s have been replaced.
+```{r}
+animals
+repla2 <- gsub(pattern = "a", replacement = "o", x = animals)
+repla2
+```
+```{r}
+# The emails vector has already been defined for you
+emails <- c("john.doe@ivyleague.edu", "education@world.gov", "dalai.lama@peace.org",
+            "invalid.edu", "quant@bigdatacollege.edu", "cookie.monster@sesame.tv")
+
+# Use grepl() to match for .edu addresses more robustly
+grepl(pattern = "@.*\\.edu$", emails)
+
+# Use grep() to match for .edu addresses more robustly, save result to hits
+hits <- grep(pattern = "@.*\\.edu$", emails)
+
+# Subset emails using hits
+emails[hits]
+```
+### Times and Dates
+
+How to deal with times and dates in R...
+
+```{r}
+# Ask R what the current date is.
+today <- Sys.Date()
+today
+```
+```{r}
+# What class is `today`variable?
+class(today)
+```
+Now let's have a look to the time function.
+```{r}
+now <- Sys.time()
+now
+```
+```{r}
+class(now)
+```
+The important class here is `POSIXct`. Apart from providing rich functionality for calculus and formatting, this class makes sure that the dates and times in R are compatible acrross different operating systems, according to the `POSIX` standard.
+
+Now let's create a date object!
+Be aware that `.Date` tries some default data formats, so we have to put de date in and specific order.
+```{r}
+# For example write the date November 12, 1992
+my_wdate <- as.Date("12-11-1992")
+my_wdate
+```
+The correct way to do that would be to put the date as `"1992-11-12"`, but we cannot always do that, especially if we have to many dates to convert.
+So, in order to specify the function we have to specify the order in which they are. Examples are listed below.
+
+`%Y`: 4-digit year (1982),\
+`%y`: 2-digit year (82),\
+`%m`: 2-digit month (01),\
+`%d`: 2-digit day of the month (13),\
+`%A`: weekday (Wednesday),\
+`%a`: abbreviated weekday (Wed),\
+`%B`: month (January),\
+`%b`: abbreviated month (Jan)\
+
+```{r}
+my_date <- as.Date("12-11-1992", format = "%d-%m-%Y")
+my_date
+```
+## Create and format times
+
+Similar to working with dates, you can use `as.POSIXct()` to convert from a character string to a `POSIXct` object, and `format()` to convert from a `POSIXct` object to a character string. Again, you have a wide variety of symbols:
+
+`%H`: hours as a decimal number (00-23),\
+`%I`: hours as a decimal number (01-12),\
+`%M`: minutes as a decimal number,\
+`%S`: seconds as a decimal number,\
+`%T`: shorthand notation for the typical format `%H:%M:%S`,\
+`%p`: AM/PM indicator\
+
+```{r}
+# For checking the full documentation in the console.
+?strptime
+```
+Again, `as.POSIXct()` uses a default format to match character strings. In this case, it's `%Y-%m-%d %H:%M:%S`. In this exercise, abstraction is made of different time zones.
+
+# Excercises
+
+1. Three character strings representing dates have been created for you. Convert them to dates using `as.Date()`, and assign them to `date1`, `date2`, and `date3` respectively. The code for `date1` is already included.
+1. Extract useful information from the dates as character strings using `format()`. From the first date, select the weekday. From the second date, select the day of the month. From the third date, you should select the abbreviated month and the 4-digit year, separated by a space.
+```{r}
+# Definition of character strings representing dates
+str1 <- "May 23, '96"
+str2 <- "2012-03-15"
+str3 <- "30/January/2006"
+
+# Convert the strings to dates: date1, date2, date3
+date1 <- as.Date(str1, format = "%b %d, '%y")
+date2 <- as.Date(str2, format = "%Y-%m-%d")
+date3 <- as.Date(str3, format = "%d/%B/%Y")
 
 
+# Convert dates to formatted strings
+format(date1, "%A")
+format(date2, "%d")
+format(date3, "%b %Y")
+```
+1. Convert two strings that represent `timestamps`, `str1` and `str2`, to `POSIXct` objects called `time1` and `time2`.
+1. Using `format()`, create a string from `time1` containing only the minutes.
+1. From `time2`, extract the hours and minutes as `"hours:minutes AM/PM"`. Refer to the assignment text above to find the correct conversion symbols!
+```{r}
+# Definition of character strings representing times
+str1 <- "May 23, '96 hours:23 minutes:01 seconds:45"
+str2 <- "2012-3-12 14:23:08"
 
+# Convert the strings to POSIXct objects: time1, time2
+time1 <- as.POSIXct(str1, format = "%B %d, '%y hours:%H minutes:%M seconds:%S")
+time2 <- as.POSIXct(str2)
+
+# Convert times to formatted strings
+format(time1, "%M")
+format(time2, "%I:%M %p")
+```
 
